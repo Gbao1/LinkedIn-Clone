@@ -1,38 +1,22 @@
-# azure-pipelines.yml
 trigger:
 - main
 
 pool:
-  vmImage: 'windows-latest'
+  name: SelfHosted
 
 steps:
-# Use .NET 9 SDK (matches your scaffold message)
-- task: UseDotNet@2
-  inputs:
-    packageType: 'sdk'
-    version: '9.0.x'
+- script: dotnet --info
+  displayName: Check .NET SDK
 
-# Optional: speed up restores between runs
-- task: Cache@2
-  inputs:
-    key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,**/*.csproj'
-    restoreKeys: |
-      nuget | "$(Agent.OS)"
-      nuget
-    path: $(NUGET_PACKAGES)
-
-# Restore, build solution (works for single or multi-project solutions)
 - script: dotnet restore LinkedInClone.sln
   displayName: Restore
 
 - script: dotnet build LinkedInClone.sln --configuration Release --no-restore
   displayName: Build
 
-# If you don’t have tests yet, this will just skip
 - script: dotnet test --configuration Release --no-build
   displayName: Test
 
-# Publish the Web app as an artifact (used later for deployments)
 - script: dotnet publish Web/Web.csproj -c Release -o $(Build.ArtifactStagingDirectory) --no-build
   displayName: Publish
 
