@@ -5,6 +5,9 @@ pool:
   name: SelfHosted
 
 steps:
+- checkout: self
+  clean: true
+
 - script: dotnet --info
   displayName: Check .NET SDK
 
