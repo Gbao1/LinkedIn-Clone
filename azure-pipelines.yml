@@ -1,0 +1,27 @@
+trigger:
+- main
+
+pool:
+  name: SelfHosted
+
+steps:
+- script: dotnet --info
+  displayName: Check .NET SDK
+
+- script: dotnet restore LinkedInClone.sln
+  displayName: Restore
+
+- script: dotnet build LinkedInClone.sln --configuration Release --no-restore
+  displayName: Build
+
+- script: dotnet test --configuration Release --no-build
+  displayName: Test
+
+- script: dotnet publish Web/Web.csproj -c Release -o $(Build.ArtifactStagingDirectory) --no-build
+  displayName: Publish
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+  displayName: Publish artifact
