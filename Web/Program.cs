@@ -1,3 +1,4 @@
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Web.Data;
@@ -5,14 +6,20 @@ using Web.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+
+// ✅ Turn on AI telemetry (reads ApplicationInsights:ConnectionString from config)
+builder.Services.AddApplicationInsightsTelemetry();
+
+// (Optional) friendly role name
+builder.Services.AddSingleton<ITelemetryInitializer, RoleNameTelemetryInitializer>();
 
 var app = builder.Build();
 
@@ -44,3 +51,14 @@ app.MapRazorPages()
    .WithStaticAssets();
 
 app.Run();
+
+// --------------------------------------------------------
+// initializer: tags telemetry with a role name
+// --------------------------------------------------------
+public sealed class RoleNameTelemetryInitializer : ITelemetryInitializer
+{
+    public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
+    {
+        telemetry.Context.Cloud.RoleName = "linkedin-web";
+    }
+}
