@@ -5095,11 +5095,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\GitHubFile\\SWE40006-Software-Deployment-and-Evolution\\linkedin-clone\\LinkedIn-Clone\\Web\\Web.csproj",
+      "projectUniqueName": "C:\\Azure Repo\\LinkedIn-Clone\\Web\\Web.csproj",
       "projectName": "Web",
-      "projectPath": "C:\\GitHubFile\\SWE40006-Software-Deployment-and-Evolution\\linkedin-clone\\LinkedIn-Clone\\Web\\Web.csproj",
+      "projectPath": "C:\\Azure Repo\\LinkedIn-Clone\\Web\\Web.csproj",
       "packagesPath": "C:\\Users\\ngjia\\.nuget\\packages\\",
-      "outputPath": "C:\\GitHubFile\\SWE40006-Software-Deployment-and-Evolution\\linkedin-clone\\LinkedIn-Clone\\Web\\obj\\",
+      "outputPath": "C:\\Azure Repo\\LinkedIn-Clone\\Web\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
