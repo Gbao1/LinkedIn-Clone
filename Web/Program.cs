@@ -8,7 +8,24 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+
+// 🔧 Use SQL Server in prod (Azure) when the connection string looks like SQL Server;
+//    otherwise fall back to Sqlite for local dev.
+//    This lets you keep Sqlite locally and switch to Azure SQL via App Service settings.
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    if (connectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase)
+        || connectionString.Contains("Initial Catalog", StringComparison.OrdinalIgnoreCase)
+        || connectionString.Contains(".database.windows.net", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseSqlServer(connectionString);
+    }
+    else
+    {
+        options.UseSqlite(connectionString);
+    }
+});
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -22,6 +39,9 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddSingleton<ITelemetryInitializer, RoleNameTelemetryInitializer>();
 
 var app = builder.Build();
+
+// 🔐 Ensure authentication middleware is enabled for Identity pages/sign-in.
+app.UseAuthentication();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -49,6 +69,14 @@ app.MapControllerRoute(
 
 app.MapRazorPages()
    .WithStaticAssets();
+
+// 🔧 Optional: auto-apply EF Core migrations on startup (useful in Azure).
+//    If you prefer running migrations from your machine/CI, you can comment this out.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();
 
