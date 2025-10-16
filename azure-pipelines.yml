@@ -1,30 +1,64 @@
 trigger:
-- main
+  - main
 
 pool:
-  name: SelfHosted
+  vmImage: 'windows-latest'   # use Microsoft-hosted agent
+
+variables:
+  webProject: 'Web/Web.csproj'
+  buildConfiguration: 'Release'
+  azureSubscription: 'AzureSub'         # <-- EXACT service-connection name you created
+  webAppName: 'wa-linkedin-clone-001'   # <-- EXACT Web App name
 
 steps:
+# Use .NET 8 SDK
+- task: UseDotNet@2
+  displayName: 'Use .NET SDK 8.x'
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'
+
+# Checkout
 - checkout: self
   clean: true
 
-- script: dotnet --info
-  displayName: Check .NET SDK
-
+# Restore / Build
 - script: dotnet restore LinkedInClone.sln
   displayName: Restore
 
-- script: dotnet build LinkedInClone.sln --configuration Release --no-restore
+- script: dotnet build LinkedInClone.sln -c $(buildConfiguration) --no-restore
   displayName: Build
 
-- script: dotnet test --configuration Release --no-build
+# If you have tests, keep this. If you don't, delete this step.
+- script: dotnet test -c $(buildConfiguration) --no-build
   displayName: Test
 
-- script: dotnet publish Web/Web.csproj -c Release -o $(Build.ArtifactStagingDirectory) --no-build
+# Publish the Web project
+- script: dotnet publish $(webProject) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/web --no-build
   displayName: Publish
 
-- task: PublishBuildArtifacts@1
+# Zip the published site
+- task: ArchiveFiles@2
+  displayName: 'Archive published site'
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-  displayName: Publish artifact
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/web'
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/web.zip'
+    replaceExistingArchive: true
+
+# (Optional) keep an artifact
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish artifact'
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)/web.zip'
+    artifactName: 'drop'
+
+# Deploy to Azure Web App (Linux)
+- task: AzureWebApp@1
+  displayName: 'Deploy to Azure Web App'
+  inputs:
+    azureSubscription: '$(azureSubscription)'
+    appType: 'webAppLinux'
+    appName: '$(webAppName)'
+    package: '$(Build.ArtifactStagingDirectory)/web.zip'
