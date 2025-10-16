@@ -1,22 +1,20 @@
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// --- Data & Identity ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// 🔧 Use SQL Server in prod (Azure) when the connection string looks like SQL Server;
-//    otherwise fall back to Sqlite for local dev.
-//    This lets you keep Sqlite locally and switch to Azure SQL via App Service settings.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    if (connectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase)
-        || connectionString.Contains("Initial Catalog", StringComparison.OrdinalIgnoreCase)
-        || connectionString.Contains(".database.windows.net", StringComparison.OrdinalIgnoreCase))
+    // Use SQL Server if the connection string looks like an Azure SQL/SQL Server string; otherwise use SQLite.
+    if (connectionString.Contains("Initial Catalog", StringComparison.OrdinalIgnoreCase)
+        || connectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase)
+        || connectionString.Contains(".database.windows.net", StringComparison.OrdinalIgnoreCase)
+        || connectionString.Contains("Data Source=tcp:", StringComparison.OrdinalIgnoreCase))
     {
         options.UseSqlServer(connectionString);
     }
@@ -28,22 +26,21 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services
+    .AddDefaultIdentity<IdentityUser>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = true;
+        // (optional) tweak password requirements here if desired
+    })
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddControllersWithViews();
-
-// ✅ Turn on AI telemetry (reads ApplicationInsights:ConnectionString from config)
-builder.Services.AddApplicationInsightsTelemetry();
-
-// (Optional) friendly role name
-builder.Services.AddSingleton<ITelemetryInitializer, RoleNameTelemetryInitializer>();
+// (optional) If you’re using Application Insights:
+// builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
-// 🔐 Ensure authentication middleware is enabled for Identity pages/sign-in.
-app.UseAuthentication();
-
-// Configure the HTTP request pipeline.
+// --- Error handling / security ---
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -51,42 +48,29 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();            // .NET 8 way to serve wwwroot
+
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
+// --- Endpoints ---
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
+app.MapRazorPages();
 
-app.MapRazorPages()
-   .WithStaticAssets();
-
-// 🔧 Optional: auto-apply EF Core migrations on startup (useful in Azure).
-//    If you prefer running migrations from your machine/CI, you can comment this out.
+// --- Auto-apply EF Core migrations on startup (Level 3 · Step 3 Option A) ---
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    db.Database.Migrate(); // idempotent: applies pending migrations or no-ops
 }
 
 app.Run();
-
-// --------------------------------------------------------
-// initializer: tags telemetry with a role name
-// --------------------------------------------------------
-public sealed class RoleNameTelemetryInitializer : ITelemetryInitializer
-{
-    public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
-    {
-        telemetry.Context.Cloud.RoleName = "linkedin-web";
-    }
-}

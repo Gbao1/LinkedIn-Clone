@@ -1,45 +1,47 @@
 trigger:
-  - main
+- main
 
 # Use your existing self-hosted agent pool
 pool:
   name: SelfHosted
 
 variables:
+  solution: 'LinkedInClone.sln'
   webProject: 'Web/Web.csproj'
-  solution: 'LinkedInClone.sln'         # change if your .sln is named differently
   buildConfiguration: 'Release'
-  azureSubscription: 'AzureSub'          # EXACT name of your DevOps Service Connection
-  webAppName: 'wa-linkedin-clone-001'    # EXACT App Service name
+  azureSubscription: 'AzureSub'          # <-- your DevOps Service Connection name
+  webAppName: 'wa-linkedin-clone-001'    # <-- your exact App Service name
 
 steps:
-# Ensure .NET 8 SDK is available
+- checkout: self
+  clean: true
+
+# Ensure the correct SDK is available on the agent
 - task: UseDotNet@2
   displayName: 'Use .NET SDK 8.x'
   inputs:
     packageType: 'sdk'
     version: '8.x'
 
-# Clean checkout
-- checkout: self
-  clean: true
+- script: dotnet --info
+  displayName: Check .NET SDK
 
 # Restore / Build
 - script: dotnet restore $(solution)
   displayName: Restore
 
-- script: dotnet build $(solution) -c $(buildConfiguration) --no-restore
+- script: dotnet build $(solution) --configuration $(buildConfiguration) --no-restore
   displayName: Build
 
-# If you don't have tests, you can remove this step
-- script: dotnet test -c $(buildConfiguration) --no-build
+# Remove this step if you don't have tests
+- script: dotnet test --configuration $(buildConfiguration) --no-build
   displayName: Test
 
-# Publish the Web project to an output folder
+# Publish the Web project to a subfolder (cleaner for zipping/deploy)
 - script: dotnet publish $(webProject) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/web --no-build
   displayName: Publish
 
-# Zip the published site for deployment
+# Zip the published output (preferred for AzureWebApp task)
 - task: ArchiveFiles@2
   displayName: 'Archive published site'
   inputs:
@@ -49,7 +51,7 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)/web.zip'
     replaceExistingArchive: true
 
-# (Optional) keep the artifact
+# Keep an artifact (optional, but handy)
 - task: PublishBuildArtifacts@1
   displayName: 'Publish artifact'
   inputs:
