@@ -1,43 +1,45 @@
 trigger:
   - main
 
+# Use your existing self-hosted agent pool
 pool:
-  name: 'SelfHosted'  # use Microsoft-hosted agent
+  name: SelfHosted
 
 variables:
   webProject: 'Web/Web.csproj'
+  solution: 'LinkedInClone.sln'         # change if your .sln is named differently
   buildConfiguration: 'Release'
-  azureSubscription: 'AzureSub'         # <-- EXACT service-connection name you created
-  webAppName: 'wa-linkedin-clone-001'   # <-- EXACT Web App name
+  azureSubscription: 'AzureSub'          # EXACT name of your DevOps Service Connection
+  webAppName: 'wa-linkedin-clone-001'    # EXACT App Service name
 
 steps:
-# Use .NET 8 SDK
+# Ensure .NET 8 SDK is available
 - task: UseDotNet@2
   displayName: 'Use .NET SDK 8.x'
   inputs:
     packageType: 'sdk'
     version: '8.x'
 
-# Checkout
+# Clean checkout
 - checkout: self
   clean: true
 
 # Restore / Build
-- script: dotnet restore LinkedInClone.sln
+- script: dotnet restore $(solution)
   displayName: Restore
 
-- script: dotnet build LinkedInClone.sln -c $(buildConfiguration) --no-restore
+- script: dotnet build $(solution) -c $(buildConfiguration) --no-restore
   displayName: Build
 
-# If you have tests, keep this. If you don't, delete this step.
+# If you don't have tests, you can remove this step
 - script: dotnet test -c $(buildConfiguration) --no-build
   displayName: Test
 
-# Publish the Web project
+# Publish the Web project to an output folder
 - script: dotnet publish $(webProject) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/web --no-build
   displayName: Publish
 
-# Zip the published site
+# Zip the published site for deployment
 - task: ArchiveFiles@2
   displayName: 'Archive published site'
   inputs:
@@ -47,7 +49,7 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)/web.zip'
     replaceExistingArchive: true
 
-# (Optional) keep an artifact
+# (Optional) keep the artifact
 - task: PublishBuildArtifacts@1
   displayName: 'Publish artifact'
   inputs:
