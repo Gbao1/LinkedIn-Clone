@@ -2,7 +2,7 @@ trigger:
   - main
 
 pool:
-  vmImage: 'windows-latest'   # use Microsoft-hosted agent
+  name: 'SelfHosted'  # use Microsoft-hosted agent
 
 variables:
   webProject: 'Web/Web.csproj'
