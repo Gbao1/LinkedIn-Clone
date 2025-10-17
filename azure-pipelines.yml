@@ -2,7 +2,7 @@ trigger:
 - brandon_frontend
 
 pool:
-  name: SelfHosted
+  name: Azure Pipelines
 
 variables:
   solution: 'LinkedInClone.sln'
