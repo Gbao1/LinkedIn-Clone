@@ -1,5 +1,5 @@
 trigger:
-- main
+- brandon_frontend
 
 pool:
   name: SelfHosted
