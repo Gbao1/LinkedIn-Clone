@@ -23,7 +23,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services
-    .AddDefaultIdentity<IdentityUser>(o => o.SignIn.RequireConfirmedAccount = true)
+    .AddDefaultIdentity<IdentityUser>(o => o.SignIn.RequireConfirmedAccount = false) //disable email confirmation now
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
