@@ -1,31 +1,39 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Web.Models;
+using System;
+using System.Collections.Generic;
 
-namespace Web.Controllers;
 
-public class HomeController : Controller
+namespace Link.Controllers
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+    public class HomeController : Controller
     {
-        _logger = logger;
-    }
+        public ActionResult Index()
+        {
+            // sample view model
+            var vm = new HomeIndexViewModel
+            {
+                CurrentUser = new UserSummary { FullName = "Brandon", Headline = "Systems Engineer + Networking" },
+                Suggestions = new List<UserSummary>
+{
+new UserSummary { FullName = "Jian", Headline = "Systems Engineer" },
+new UserSummary { FullName = "Bao", Headline = "Data Scientist" },
+new UserSummary { FullName = "Emelee", Headline = "Data Scientist" }
+},
+                FeedItems = new List<FeedItem>
+{
+new FeedItem { Id = 1, Author = "Jian", AuthorTitle = "Systems Engineer", TimeAgo = "2h", Text = "Dev Ops is cool" },
+new FeedItem { Id = 2, Author = "Bao", AuthorTitle = "Data Scientist", TimeAgo = "6h", Text = "sup guys" },
+new FeedItem { Id = 3, Author = "Emelee", AuthorTitle = "Data Scientist", TimeAgo = "1d", Text = "LinkedIn isn't as good or something." }
+}
+            };
 
-    public IActionResult Index()
-    {
-        return View();
-    }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+            return View(vm);
+        }
+        public IActionResult Login()
+        {
+            return View();
+        }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
