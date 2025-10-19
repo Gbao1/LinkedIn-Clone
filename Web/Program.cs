@@ -64,4 +64,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.MapGet("/healthz", () => Results.Ok("OK " + DateTime.UtcNow.ToString("u")));
+
 app.Run();
