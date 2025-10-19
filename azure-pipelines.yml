@@ -1,5 +1,14 @@
 trigger:
-- main
+  branches:
+    include:
+      - main
+      - brandon_frontend 
+
+# Pull request (merge)
+pr:
+  branches:
+    include:
+      - main
 
 pool:
   name: SelfHosted
@@ -56,9 +65,10 @@ steps:
     pathToPublish: '$(Build.ArtifactStagingDirectory)/web.zip'
     artifactName: 'drop'
 
-# Deploy to Azure Web App (Linux)
+# --- DEPLOY STEP: add a guard so only main deploys ---
 - task: AzureWebApp@1
   displayName: 'Deploy to Azure Web App'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   inputs:
     azureSubscription: '$(azureSubscription)'
     appType: 'webAppLinux'
