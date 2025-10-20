@@ -9432,23 +9432,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\bp186\\.nuget\\packages\\": {},
+    "C:\\Users\\Acer\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\bp186\\source\\repos\\LinkedIn-Clone\\Web\\Web.csproj",
+      "projectUniqueName": "C:\\Users\\Acer\\OneDrive\\Documents\\Swin\\10_Software_Deployment\\LinkedIn-Clone\\Web\\Web.csproj",
       "projectName": "Web",
-      "projectPath": "C:\\Users\\bp186\\source\\repos\\LinkedIn-Clone\\Web\\Web.csproj",
-      "packagesPath": "C:\\Users\\bp186\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\bp186\\source\\repos\\LinkedIn-Clone\\Web\\obj\\",
+      "projectPath": "C:\\Users\\Acer\\OneDrive\\Documents\\Swin\\10_Software_Deployment\\LinkedIn-Clone\\Web\\Web.csproj",
+      "packagesPath": "C:\\Users\\Acer\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Acer\\OneDrive\\Documents\\Swin\\10_Software_Deployment\\LinkedIn-Clone\\Web\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\bp186\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Acer\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],

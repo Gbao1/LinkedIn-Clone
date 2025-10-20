@@ -1,26 +1,32 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject Web.Data.ApplicationDbContext Db
 
-<ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-        </form>
-    </li>
+    var user = await UserManager.GetUserAsync(User);
+    var profile = Db.Profiles.FirstOrDefault(p => p.UserId == user.Id);
+    var avatar = string.IsNullOrEmpty(profile?.AvatarUrl) ? Url.Content("~/images/default-avatar.png") : profile.AvatarUrl;
+    <ul class="nav navbar-nav navbar-right">
+        <li class="nav-item d-flex align-items-center">
+            <img src="@avatar" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;margin-right:8px;" />
+            @* username links to account configuration (Identity manage) *@
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" style="padding:0; margin:0; color:inherit;">
+                @user.UserName
+            </a>
+        </li>
+        <li class="nav-item">
+            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" method="post" id="logoutForm">
+                <button type="submit" class="nav-link btn btn-link">Logout</button>
+            </form>
+        </li>
+    </ul>
 }
 else
 {
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
+    <ul class="nav navbar-nav navbar-right">
+        <li class="nav-item"><a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Log in</a></li>
+        <li class="nav-item"><a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a></li>
+    </ul>
 }
-</ul>
