@@ -1,7 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Hosting
 @using Microsoft.AspNetCore.Mvc.ViewEngines
+@using Microsoft.AspNetCore.Identity
 @inject IWebHostEnvironment Environment
 @inject ICompositeViewEngine Engine
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,9 +40,17 @@
                         <li class="nav-item me-5">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+
+                        @* Profile tab visible when signed in - placed inside the main UL *@
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item me-5">
+                                <a class="nav-link text-dark" asp-controller="Profiles" asp-action="Details">Profile</a>
+                            </li>
+                        }
                     </ul>
 
-                    <!-- Right side (login/profile) -->
+                    <!-- Right side (login/profile partial) -->
                     @{
                         var result = Engine.FindView(ViewContext, "_LoginPartial", isMainPage: false);
                     }
@@ -52,6 +63,7 @@
                         throw new InvalidOperationException("The default Identity UI layout requires a partial view '_LoginPartial'. " +
                         "Make sure it exists under '/Pages/_LoginPartial' or '/Views/Shared/_LoginPartial'.");
                     }
+
                 </div>
             </div>
         </nav>

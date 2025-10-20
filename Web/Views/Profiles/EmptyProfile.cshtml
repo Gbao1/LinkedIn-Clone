@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "No profile";
+}
+<link rel="stylesheet" href="~/css/site.css" />
+
+<div class="container">
+    <h2>No profile available</h2>
+    <p>This user has not created a profile yet.</p>
+
+    @if (User?.Identity?.IsAuthenticated == true)
+    {
+        <p>
+            <a class="btn btn-primary" asp-action="Edit">Create your profile</a>
+            <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Back to feed</a>
+        </p>
+    }
+    else
+    {
+        <p><a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Back to feed</a></p>
+    }
+</div>
