@@ -39,6 +39,16 @@
                         </li>
                     </ul>
 
+
+                    <div class="d-flex flex-grow-1 justify-content-left">
+                        <form class="w-50">
+                            <div class="input-group">
+                                <input class="form-control" placeholder="Search people, jobs, posts" />
+                                <button class="btn btn-primary">Search</button>
+                            </div>
+                        </form>
+                    </div>
+
                     <!-- Right side (login/profile) -->
                     @{
                         var result = Engine.FindView(ViewContext, "_LoginPartial", isMainPage: false);

@@ -29,6 +29,7 @@ builder.Services
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+app.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
 if (!app.Environment.IsDevelopment())
 {
