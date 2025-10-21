@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Web.Data;
 using Web.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
 
 namespace Web.Controllers;
 [Authorize]

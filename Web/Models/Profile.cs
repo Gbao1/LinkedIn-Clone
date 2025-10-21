@@ -11,6 +11,7 @@ namespace Web.Models
         [Required]
         public string UserId { get; set; }
 
+        [Required(ErrorMessage = "Full Name is required.")]
         [StringLength(100)]
         public string FullName { get; set; }
 

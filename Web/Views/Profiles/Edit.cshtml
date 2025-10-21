@@ -39,26 +39,43 @@
         </div>
 
         <h4>Sections (Experience, Education, Projects)</h4>
+
         <div id="sections">
             @{
                 // Deserialize into a predictable structure (list of dictionaries)
                 var sections = new List<Dictionary<string, string>>();
+
                 if (!string.IsNullOrEmpty(Model.SectionsJson))
                 {
                     try
                     {
-                        sections = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, string>>>(Model.SectionsJson)
-                                   ?? new List<Dictionary<string, string>>();
+                        sections = System.Text.Json.JsonSerializer
+                            .Deserialize<List<Dictionary<string, string>>>(Model.SectionsJson)
+                            ?? new List<Dictionary<string, string>>();
                     }
                     catch
                     {
                         sections = new List<Dictionary<string, string>>();
                     }
                 }
-                if (sections.Count == 0) sections.Add(new Dictionary<string, string> { { "title", "" }, { "content", "" } });
+
+                if (sections.Count == 0)
+                {
+                    sections.Add(new Dictionary<string, string>
+                    {
+                        { "title", "" },
+                        { "content", "" }
+                    });
+                }
+
+                for (int i = 0; i < sections.Count; i++)
+                {
+                    var s = sections[i];
+                    var title = s.ContainsKey("title") ? s["title"] : "";
+                    var content = s.ContainsKey("content") ? s["content"] : "";
             }
 
-            @for (int i = 0; i < sections.Count; i++)
+                for (int i = 0; i < sections.Count; i++)
             {
                 var s = sections[i];
                 var title = s.ContainsKey("title") ? s["title"] : "";
@@ -76,6 +93,7 @@
                     <hr />
                 </div>
             }
+            }
         </div>
 
         <p>
@@ -90,41 +108,52 @@
 </div>
 
 @section Scripts {
-<script>
-    (function () {
-        const sectionsRoot = document.getElementById('sections');
+    <script>
+        (function () {
+            const sectionsRoot = document.getElementById('sections');
 
-        function addSection(title = '', content = '') {
-            const block = document.createElement('div');
-            block.className = 'section-block';
-            block.innerHTML = `
-                <div class="form-group"><label>Section title</label><input name="sectionsTitle" class="form-control" value="${escapeHtml(title)}"></div>
-                <div class="form-group"><label>Content</label><textarea name="sectionsContent" class="form-control" rows="3">${escapeHtml(content)}</textarea></div>
-                <button type="button" class="btn btn-danger remove-section">Remove</button><hr />
-            `;
-            sectionsRoot.appendChild(block);
-            block.querySelector('.remove-section').addEventListener('click', function () { block.remove(); });
-        }
+            function addSection(title = '', content = '') {
+                const block = document.createElement('div');
+                block.className = 'section-block';
+                block.innerHTML = `
+                        <div class="form-group">
+                            <label>Section title</label>
+                            <input name="sectionsTitle" class="form-control" value="${escapeHtml(title)}">
+                        </div>
+                        <div class="form-group">
+                            <label>Content</label>
+                            <textarea name="sectionsContent" class="form-control" rows="3">${escapeHtml(content)}</textarea>
+                        </div>
+                        <button type="button" class="btn btn-danger remove-section">Remove</button>
+                        <hr />
+                    `;
+                sectionsRoot.appendChild(block);
+                block.querySelector('.remove-section').addEventListener('click', function () {
+                    block.remove();
+                });
+            }
 
-        document.getElementById('addSection').addEventListener('click', function () {
-            addSection('', '');
-        });
+            document.getElementById('addSection').addEventListener('click', function () {
+                addSection('', '');
+            });
 
-        // wire existing remove buttons
-        document.querySelectorAll('.remove-section').forEach(function (btn) {
-            btn.addEventListener('click', function () { btn.closest('.section-block').remove(); });
-        });
+            // Wire up existing remove buttons
+            document.querySelectorAll('.remove-section').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    btn.closest('.section-block').remove();
+                });
+            });
 
-        // simple HTML escape for insertion into template literals
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-        }
-    })();
-</script>
+            // Simple HTML escape function
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+            }
+        })();
+    </script>
 }
