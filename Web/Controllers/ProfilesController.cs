@@ -7,6 +7,7 @@ using Web.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Web.Controllers;
+
 [Authorize]
 public class ProfilesController : Controller
 {
@@ -54,10 +55,11 @@ public class ProfilesController : Controller
         var user = await _um.GetUserAsync(User);
         if (user == null) return Challenge();
 
-        // collect sections from form arrays
+        // Get form data for sections
         var titles = Request.Form["sectionsTitle"].ToArray();
         var contents = Request.Form["sectionsContent"].ToArray();
         var sections = new List<object>();
+
         for (int i = 0; i < Math.Min(titles.Length, contents.Length); i++)
         {
             var t = titles[i].Trim();
@@ -66,26 +68,43 @@ public class ProfilesController : Controller
             sections.Add(new { title = t, content = c });
         }
 
+        // Try to find an existing profile for this user
         var profile = await _db.Profiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
+
         if (profile == null)
         {
-            profile = new Profile { UserId = user.Id };
+            // Create new if not exists
+            profile = new Profile
+            {
+                UserId = user.Id,
+                FullName = model.FullName,
+                Headline = model.Headline,
+                Location = model.Location,
+                Summary = model.Summary,
+                AvatarUrl = string.IsNullOrWhiteSpace(model.AvatarUrl) ? "" : model.AvatarUrl,
+                SectionsJson = JsonSerializer.Serialize(sections),
+                UpdatedAt = DateTime.UtcNow
+            };
+
             _db.Profiles.Add(profile);
         }
+        else
+        {
+            // Update existing
+            profile.FullName = model.FullName;
+            profile.Headline = model.Headline;
+            profile.Location = model.Location;
+            profile.Summary = model.Summary;
+            profile.AvatarUrl = string.IsNullOrWhiteSpace(model.AvatarUrl) ? "" : model.AvatarUrl;
+            profile.SectionsJson = JsonSerializer.Serialize(sections);
+            profile.UpdatedAt = DateTime.UtcNow;
 
-        // update fields (bind only allowed fields)
-        profile.FullName = model.FullName;
-        profile.Headline = model.Headline;
-        profile.Location = model.Location;
-        profile.Summary = model.Summary;
-
-        // ensure AvatarUrl is never null to avoid NOT NULL DB errors
-        profile.AvatarUrl = string.IsNullOrWhiteSpace(model.AvatarUrl) ? "" : model.AvatarUrl;
-
-        profile.SectionsJson = JsonSerializer.Serialize(sections);
-        profile.UpdatedAt = DateTime.UtcNow;
+            _db.Profiles.Update(profile);
+        }
 
         await _db.SaveChangesAsync();
+
+        // Redirect to profile details to confirm save worked
         return RedirectToAction(nameof(Details));
     }
 }
