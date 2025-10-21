@@ -16,19 +16,19 @@ namespace Web.Models
         public string FullName { get; set; }
 
         [StringLength(150)]
-        public string Headline { get; set; }
+        public string? Headline { get; set; }
 
         [StringLength(100)]
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
-        public string Summary { get; set; }
+        public string? Summary { get; set; }
 
         // optional avatar path or url
         [StringLength(250)]
         public string AvatarUrl { get; set; } = "/images/profilepictures/img2.webp";
 
         // JSON blob for dynamic sections [{ "title":"Experience", "content":"..." }, ...]
-        public string SectionsJson { get; set; }
+        public string? SectionsJson { get; set; }
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }

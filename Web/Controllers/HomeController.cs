@@ -29,7 +29,7 @@ namespace Link.Controllers
                 CurrentUser = new UserProfile
                 {
                     FullName = User.Identity.Name ?? "Guest",
-                    Headline = "Developer",
+                    Headline = "-",
                     AvatarUrl = "/images/profilepictures/img2.webp"
                 },
                 Suggestions = await _db.UserProfiles

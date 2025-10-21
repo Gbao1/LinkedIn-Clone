@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿
+using System.Collections.Generic;
 using Web.Models;
+
 namespace Web.Data
 {
     public class HomeIndexViewModel
