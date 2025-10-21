@@ -25,7 +25,7 @@ namespace Web.Models
 
         // optional avatar path or url
         [StringLength(250)]
-        public string AvatarUrl { get; set; }
+        public string AvatarUrl { get; set; } = "/images/profilepictures/img2.webp";
 
         // JSON blob for dynamic sections [{ "title":"Experience", "content":"..." }, ...]
         public string SectionsJson { get; set; }
