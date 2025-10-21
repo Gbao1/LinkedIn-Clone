@@ -15,7 +15,7 @@ namespace Link.Controllers
                 CurrentUser = new UserSummary { FullName = "Brandon", Headline = "Systems Engineer + Networking" },
                 Suggestions = new List<UserSummary>
 {
-new UserSummary { FullName = "Jian", Headline = "Systems Engineer" },
+new UserSummary { FullName = "Jian", Headline = "Systems Engineer", AvatarUrl= "/images/profilepictures/img4.avif" },
 new UserSummary { FullName = "Bao", Headline = "Data Scientist" },
 new UserSummary { FullName = "Emelee", Headline = "Data Scientist" }
 },

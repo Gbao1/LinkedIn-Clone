@@ -15,7 +15,7 @@ namespace Link
     {
         public string FullName { get; set; }
         public string Headline { get; set; }
-        public string AvatarUrl { get; set; } = "https://via.placeholder.com/72";
+        public string AvatarUrl { get; set; } = "/images/profilepictures/img2.webp";
     }
 
 
