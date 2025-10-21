@@ -64,5 +64,24 @@ using (var scope = app.Services.CreateScope())
         // Do NOT throw; app should still run so you can see the error page/logs.
     }
 }
+// Apply migrations and seed data
+using (var scope = app.Services.CreateScope())
+{
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate(); // ensures DB and tables are created
+        logger.LogInformation("EF migrations applied.");
+
+        // ✅ Seed test data
+        DbInitializer.Seed(db);
+        logger.LogInformation("Database seeding completed.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "EF migration or seeding failed on startup (continuing so app can start).");
+    }
+}
 
 app.Run();

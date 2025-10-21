@@ -1,41 +1,98 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Web.Data;
+using Web.Models;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Link.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Index()
+        private readonly ApplicationDbContext _db;
+
+        public HomeController(ApplicationDbContext db)
         {
-            // sample view model
+            _db = db;
+        }
+
+        // GET: Home/Index
+        public async Task<IActionResult> Index()
+        {
+            // Load feed items including likes
+            var feedItems = await _db.FeedItems
+                .Include(f => f.Likes)
+                .ToListAsync();
+
             var vm = new HomeIndexViewModel
             {
                 CurrentUser = new UserProfile
                 {
-                    FullName = "Brandon",
-                    Headline = "Systems Engineer + Networking",
+                    FullName = User.Identity.Name ?? "Guest",
+                    Headline = "Developer",
                     AvatarUrl = "/images/profilepictures/img2.webp"
                 },
-                Suggestions = new List<UserProfile>
-                {
-                    new UserProfile { FullName = "Jian", Headline = "Systems Engineer", AvatarUrl= "/images/profilepictures/img2.webp" },
-                    new UserProfile { FullName = "Bao", Headline = "Data Scientist", AvatarUrl= "/images/profilepictures/img3.jpg" },
-                    new UserProfile { FullName = "Emelee", Headline = "Data Scientist", AvatarUrl= "/images/profilepictures/img5.jpg" }
-                },
-                FeedItems = new List<FeedItem>
-                {
-                    new FeedItem { Id = 1, Author = "Jian", AuthorTitle = "Systems Engineer", TimeAgo = "2h", Text = "Hello", AvatarUrl="/images/profilepictures/img2.webp" },
-                    new FeedItem { Id = 2, Author = "Bao", AuthorTitle = "Data Scientist", TimeAgo = "6h", Text = "Sup guys", AvatarUrl="/images/profilepictures/img3.jpg" },
-                    new FeedItem { Id = 3, Author = "Emelee", AuthorTitle = "Data Scientist", TimeAgo = "1d", Text = "Hey Guys.", AvatarUrl="/images/profilepictures/img2.webp" }
-                }
+                Suggestions = await _db.UserProfiles
+                    .Select(u => new UserProfile
+                    {
+                        FullName = u.FullName,
+                        Headline = u.Headline,
+                        AvatarUrl = u.AvatarUrl
+                    })
+                    .ToListAsync(),
+                FeedItems = feedItems
             };
 
             return View(vm);
         }
-
-        public IActionResult Login()
+        [HttpPost]
+        public async Task<IActionResult> CreatePost(string text)
         {
-            return View();
+            if (string.IsNullOrWhiteSpace(text))
+                return RedirectToAction("Index");
+
+            var post = new FeedItem
+            {
+                Author = User.Identity.Name,
+                AuthorTitle = "Developer", // optionally pull from Profile
+                Text = text,
+                TimeAgo = "Just now",
+                AvatarUrl = "/images/profilepictures/img2.webp"
+            };
+
+            _db.FeedItems.Add(post);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Index");
         }
+        [HttpPost]
+        public async Task<IActionResult> LikePost(int id)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Unauthorized();
+
+            var post = await _db.FeedItems
+                .Include(f => f.Likes)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (post == null) return NotFound();
+
+            // Avoid duplicate likes by same user
+            if (!post.Likes.Any(l => l.UserName == User.Identity.Name))
+            {
+                post.Likes.Add(new Like
+                {
+                    UserName = User.Identity.Name
+                });
+
+                await _db.SaveChangesAsync();
+            }
+
+            // Return updated likes
+            var likes = post.Likes.Select(l => l.UserName).ToList();
+            return Json(likes);
+        }
+
+
     }
 }

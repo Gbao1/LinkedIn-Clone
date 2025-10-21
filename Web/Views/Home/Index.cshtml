@@ -1,30 +1,54 @@
-﻿@model Link.HomeIndexViewModel
+﻿@model Web.Data.HomeIndexViewModel
 @{
-	ViewData["Title"] = "Home";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <!doctype html>
 <html lang="en">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Link — Home</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-	<style>
-		body { background: #f3f6fb; }
-		.hero { background: linear-gradient(90deg,#0d6efd33,#6f42c133); padding: 2rem; border-radius: .75rem; }
-		.profile-avatar { width:72px; height:72px; border-radius: .5rem; object-fit:cover; }
-		.card-modern { border-radius: .75rem; box-shadow: 0 6px 18px rgba(20,30,60,0.06); }
-		.muted { color: #6c757d; }
-		.connect-btn { border-radius: 999px; }
-	</style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Link — Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #f3f6fb;
+        }
+
+        .hero {
+            background: linear-gradient(90deg,#0d6efd33,#6f42c133);
+            padding: 2rem;
+            border-radius: .75rem;
+        }
+
+        .profile-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: .5rem;
+            object-fit: cover;
+        }
+
+        .card-modern {
+            border-radius: .75rem;
+            box-shadow: 0 6px 18px rgba(20,30,60,0.06);
+        }
+
+        .muted {
+            color: #6c757d;
+        }
+
+        .connect-btn {
+            border-radius: 999px;
+        }
+    </style>
 </head>
 <body>
-
     <div class="container py-4">
         <div class="row g-3">
-            <!-- main content -->
+            <!-- Main Feed -->
             <div class="col-lg-8">
+                <!-- Current User Hero -->
                 <div class="hero card-modern p-4 mb-3">
                     <div class="d-flex align-items-center">
                         <img src="@Model.CurrentUser.AvatarUrl" alt="avatar" class="profile-avatar me-3" />
@@ -37,14 +61,14 @@
                         </div>
                     </div>
                 </div>
-                <!-- Feed -->
+
+                <!-- Feed Items -->
                 <div>
                     @foreach (var item in Model.FeedItems)
-					{
+    {
                     <div class="card-modern bg-white p-3 mb-3">
                         <div class="d-flex">
                             <img src="@item.AvatarUrl" alt="@item.Author" class="rounded me-3" width="56" height="56" />
-
                             <div class="flex-grow-1">
                                 <div class="d-flex align-items-center">
                                     <div>
@@ -53,61 +77,80 @@
                                     </div>
                                     <div class="ms-auto muted">•••</div>
                                 </div>
+
                                 <p class="mt-2 mb-1">@item.Text</p>
+
+                                <!-- Action Buttons -->
                                 <div class="d-flex align-items-center mt-2 small muted">
                                     @if (User.Identity.IsAuthenticated)
-										{
+                        {
                                     <button type="button" onclick="likePost(@item.Id)" class="btn btn-sm btn-light me-2">Like</button>
                                     <button type="button" class="btn btn-sm btn-light me-2">Comment</button>
                                     <button type="button" class="btn btn-sm btn-light">Share</button>
-										}
-										else
-										{
+                        }
+                        else
+                        {
                                     <button type="button" onclick="showSignInPopup()" class="btn btn-sm btn-light me-2">Like</button>
                                     <button type="button" onclick="showSignInPopup()" class="btn btn-sm btn-light me-2">Comment</button>
                                     <button type="button" onclick="showSignInPopup()" class="btn btn-sm btn-light">Share</button>
-										}
+                        }
                                 </div>
 
+                                <!-- Likes Display -->
+                                <div class="small mt-1 text-muted" id="likes-@item.Id">
+                                    @if (item.Likes != null && item.Likes.Count > 0)
+                        {
+                            var firstThree = item.Likes.Take(3).Select(l => l.UserName).ToList();
+                                    <text>@string.Join(", ", firstThree)</text>
+                                    if (item.Likes.Count > 3)
+                            {
+                                    <text> + @(item.Likes.Count - 3) more</text>
+                            }
+                        }
+                                </div>
                             </div>
                         </div>
                     </div>
-					}
+    }
                 </div>
             </div>
 
-            <!-- sidebar -->
-            <div class="col-lg-4">
-                <div class="card-modern bg-white p-3 mb-3">
-                    <h6 class="mb-3">People You May Know</h6>
-                    @foreach (var s in Model.Suggestions)
-			{
-                    <div class="d-flex align-items-center mb-3">
-                        <img src="https://via.placeholder.com/48" class="rounded-circle me-3" />
-                        <div>
-                            <div><strong>@s.FullName</strong></div>
-                            <div class="small muted">@s.Headline</div>
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- People You May Know -->
+                    <div class="card-modern bg-white p-3 mb-3">
+                        <h6 class="mb-3">People You May Know</h6>
+                        @foreach (var s in Model.Suggestions)
+                    {
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="@s.AvatarUrl" class="rounded-circle me-3" width="48" height="48" />
+                            <div>
+                                <div><strong>@s.FullName</strong></div>
+                                <div class="small muted">@s.Headline</div>
+                            </div>
+                            <div class="ms-auto">
+                                <button class="btn btn-sm btn-outline-primary">Connect</button>
+                            </div>
                         </div>
-                        <div class="ms-auto">
-                            <button class="btn btn-sm btn-outline-primary">Connect</button>
-                        </div>
+                    }
                     </div>
-			}
-                </div>
 
-
-                <div class="card-modern bg-white p-3 mb-3">
-                    <h6 class="mb-3">Trending Topics</h6>
-                    <ul class="list-unstyled small muted mb-0">
-                        <li>#cloud • 9,321 followers</li>
-                        <li>#dotnet • 6,214 followers</li>
-                        <li>#ai • 18,041 followers</li>
-                    </ul>
+                    <!-- Trending Topics -->
+                    <div class="card-modern bg-white p-3 mb-3">
+                        <h6 class="mb-3">Trending Topics</h6>
+                        <ul class="list-unstyled small muted mb-0">
+                            <li>#cloud • 9,321 followers</li>
+                            <li>#dotnet • 6,214 followers</li>
+                            <li>#ai • 18,041 followers</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
+
         <footer class="mt-4 muted small">© Link — Keeping Professionals Active.</footer>
     </div>
+
+    <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="ModalSignLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
@@ -136,20 +179,25 @@
             </div>
         </div>
     </div>
-
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function likePost(id) {
-            // Example action for authenticated users
-            alert('Liked post #' + id);
-        }
-
         function showSignInPopup() {
             var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
             loginModal.show();
         }
 
+        async function likePost(postId) {
+            const response = await fetch(`/Home/LikePost?id=${postId}`, { method: 'POST' });
+            if (response.ok) {
+                const likes = await response.json();
+                const likesDiv = document.getElementById('likes-' + postId);
+                let displayLikes = likes.length + " " + (likes.length === 1 ? "like" : "likes");
+                likesDiv.innerText = displayLikes;
+            } else if (response.status === 401) {
+                showSignInPopup();
+            }
+        }
     </script>
 </body>
 </html>
