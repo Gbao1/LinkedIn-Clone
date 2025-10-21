@@ -7,14 +7,16 @@ namespace Web.Models
     {
         public int Id { get; set; }
 
-        // link to Identity user
+        // Link to Identity user
         [Required]
         public string UserId { get; set; }
 
-        [Required(ErrorMessage = "Full Name is required.")]
+        // ✅ FullName is required
+        [Required]
         [StringLength(100)]
         public string FullName { get; set; }
 
+        // Optional fields
         [StringLength(150)]
         public string? Headline { get; set; }
 
@@ -23,11 +25,11 @@ namespace Web.Models
 
         public string? Summary { get; set; }
 
-        // optional avatar path or url
+        // Optional avatar path or URL
         [StringLength(250)]
-        public string AvatarUrl { get; set; } = "/images/profilepictures/img2.webp";
+        public string? AvatarUrl { get; set; }
 
-        // JSON blob for dynamic sections [{ "title":"Experience", "content":"..." }, ...]
+        // Optional JSON blob for dynamic sections
         public string? SectionsJson { get; set; }
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
