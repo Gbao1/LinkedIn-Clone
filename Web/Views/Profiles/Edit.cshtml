@@ -7,15 +7,16 @@
 <div class="container">
     <h2>Edit Profile</h2>
 
-    <form asp-action="Edit" method="post">
+    <form asp-action="Edit" method="post" id="profileForm">
         @Html.AntiForgeryToken()
 
         <input type="hidden" name="Id" value="@Model.Id" />
         <input type="hidden" name="UserId" value="@Model.UserId" />
 
         <div class="form-group">
-            <label>Full Name</label>
-            <input name="FullName" class="form-control" value="@(Model.FullName ?? "")" />
+            <label for="FullName">Full Name <span style="color:red">*</span></label>
+            <input id="FullName" name="FullName" class="form-control" value="@(Model.FullName ?? "")" required />
+            <small id="FullNameError" class="text-danger" style="display:none;">Full Name is required.</small>
         </div>
 
         <div class="form-group">
@@ -41,7 +42,6 @@
         <h4>Sections (Experience, Education, Projects)</h4>
         <div id="sections">
             @{
-                // Deserialize into a predictable structure (list of dictionaries)
                 var sections = new List<Dictionary<string, string>>();
                 if (!string.IsNullOrEmpty(Model.SectionsJson))
                 {
@@ -55,7 +55,8 @@
                         sections = new List<Dictionary<string, string>>();
                     }
                 }
-                if (sections.Count == 0) sections.Add(new Dictionary<string, string> { { "title", "" }, { "content", "" } });
+                if (sections.Count == 0)
+                    sections.Add(new Dictionary<string, string> { { "title", "" }, { "content", "" } });
             }
 
             @for (int i = 0; i < sections.Count; i++)
@@ -91,40 +92,71 @@
 
 @section Scripts {
 <script>
-    (function () {
-        const sectionsRoot = document.getElementById('sections');
+(function () {
+    const form = document.getElementById("profileForm");
+    const fullNameInput = document.getElementById("FullName");
+    const errorMsg = document.getElementById("FullNameError");
 
-        function addSection(title = '', content = '') {
-            const block = document.createElement('div');
-            block.className = 'section-block';
-            block.innerHTML = `
-                <div class="form-group"><label>Section title</label><input name="sectionsTitle" class="form-control" value="${escapeHtml(title)}"></div>
-                <div class="form-group"><label>Content</label><textarea name="sectionsContent" class="form-control" rows="3">${escapeHtml(content)}</textarea></div>
-                <button type="button" class="btn btn-danger remove-section">Remove</button><hr />
-            `;
-            sectionsRoot.appendChild(block);
-            block.querySelector('.remove-section').addEventListener('click', function () { block.remove(); });
+    // Prevent form submission if Full Name is empty
+    form.addEventListener("submit", function (e) {
+        if (fullNameInput.value.trim() === "") {
+            e.preventDefault();
+            errorMsg.style.display = "block";
+            fullNameInput.focus();
+        } else {
+            errorMsg.style.display = "none";
         }
+    });
 
-        document.getElementById('addSection').addEventListener('click', function () {
-            addSection('', '');
-        });
-
-        // wire existing remove buttons
-        document.querySelectorAll('.remove-section').forEach(function (btn) {
-            btn.addEventListener('click', function () { btn.closest('.section-block').remove(); });
-        });
-
-        // simple HTML escape for insertion into template literals
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+    // Hide error message as soon as user starts typing
+    fullNameInput.addEventListener("input", function () {
+        if (fullNameInput.value.trim() !== "") {
+            errorMsg.style.display = "none";
         }
-    })();
+    });
+
+    // Add/Remove sections logic
+    const sectionsRoot = document.getElementById('sections');
+    document.getElementById('addSection').addEventListener('click', function () {
+        addSection('', '');
+    });
+
+    document.querySelectorAll('.remove-section').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            btn.closest('.section-block').remove();
+        });
+    });
+
+    function addSection(title = '', content = '') {
+        const block = document.createElement('div');
+        block.className = 'section-block';
+        block.innerHTML = `
+            <div class="form-group">
+                <label>Section title</label>
+                <input name="sectionsTitle" class="form-control" value="${escapeHtml(title)}">
+            </div>
+            <div class="form-group">
+                <label>Content</label>
+                <textarea name="sectionsContent" class="form-control" rows="3">${escapeHtml(content)}</textarea>
+            </div>
+            <button type="button" class="btn btn-danger remove-section">Remove</button>
+            <hr />
+        `;
+        sectionsRoot.appendChild(block);
+        block.querySelector('.remove-section').addEventListener('click', function () {
+            block.remove();
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+})();
 </script>
 }

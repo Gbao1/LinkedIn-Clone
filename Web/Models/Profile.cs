@@ -7,27 +7,30 @@ namespace Web.Models
     {
         public int Id { get; set; }
 
-        // link to Identity user
+        // Link to Identity user
         [Required]
         public string UserId { get; set; }
 
+        // ✅ FullName is required
+        [Required]
         [StringLength(100)]
         public string FullName { get; set; }
 
+        // Optional fields
         [StringLength(150)]
-        public string Headline { get; set; }
+        public string? Headline { get; set; }
 
         [StringLength(100)]
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
-        public string Summary { get; set; }
+        public string? Summary { get; set; }
 
-        // optional avatar path or url
+        // Optional avatar path or URL
         [StringLength(250)]
-        public string AvatarUrl { get; set; }
+        public string? AvatarUrl { get; set; }
 
-        // JSON blob for dynamic sections [{ "title":"Experience", "content":"..." }, ...]
-        public string SectionsJson { get; set; }
+        // Optional JSON blob for dynamic sections
+        public string? SectionsJson { get; set; }
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
