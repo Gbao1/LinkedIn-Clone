@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Web-e07fd553-1301-4e5a-9af9-f4acf55f2132</UserSecretsId>
+	  <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
