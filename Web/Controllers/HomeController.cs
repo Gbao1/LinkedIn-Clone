@@ -77,15 +77,17 @@ namespace Link.Controllers
                 return Unauthorized();
             }
 
+            // Check if user already liked the post
             var existingLike = await _db.Likes
                 .FirstOrDefaultAsync(l => l.FeedItemId == id && l.UserId == user.Id);
 
             if (existingLike == null)
             {
+                // Add new like
                 var like = new Like
                 {
                     FeedItemId = id,
-                    UserId = user.Id, 
+                    UserId = user.Id,
                     UserName = user.UserName
                 };
                 _db.Likes.Add(like);
@@ -93,16 +95,36 @@ namespace Link.Controllers
             }
             else
             {
+                // Unlike
                 _db.Likes.Remove(existingLike);
                 await _db.SaveChangesAsync();
             }
 
-            var likes = await _db.Likes
+            // Get all likes for this post
+            var likeUsernames = await _db.Likes
                 .Where(l => l.FeedItemId == id)
+                .Select(l => l.UserName)
                 .ToListAsync();
 
-            return Json(likes);
+            // Format the string
+            string formatted;
+            if (likeUsernames.Count == 0)
+            {
+                formatted = "";
+            }
+            else if (likeUsernames.Count <= 3)
+            {
+                formatted = $"{string.Join(", ", likeUsernames)} liked this";
+            }
+            else
+            {
+                var firstThree = likeUsernames.Take(3);
+                formatted = $"{string.Join(", ", firstThree)} +{likeUsernames.Count - 3} more liked this";
+            }
+
+            return Json(new { formatted });
         }
+
 
 
 
