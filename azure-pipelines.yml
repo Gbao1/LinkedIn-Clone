@@ -1,5 +1,5 @@
 trigger:
-- Like_and_Profile_Complete
+- bao_posting
 
 pool:
   name: SelfHosted
