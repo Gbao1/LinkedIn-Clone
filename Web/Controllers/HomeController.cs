@@ -1,19 +1,22 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Web.Data;
 using Web.Models;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace Link.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _db;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public HomeController(ApplicationDbContext db)
+        public HomeController(ApplicationDbContext db, UserManager<IdentityUser> userManager)
         {
             _db = db;
+            _userManager = userManager;
         }
 
         // GET: Home/Index
@@ -68,30 +71,39 @@ namespace Link.Controllers
         [HttpPost]
         public async Task<IActionResult> LikePost(int id)
         {
-            if (!User.Identity.IsAuthenticated)
-                return Unauthorized();
-
-            var post = await _db.FeedItems
-                .Include(f => f.Likes)
-                .FirstOrDefaultAsync(f => f.Id == id);
-
-            if (post == null) return NotFound();
-
-            // Avoid duplicate likes by same user
-            if (!post.Likes.Any(l => l.UserName == User.Identity.Name))
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                post.Likes.Add(new Like
-                {
-                    UserName = User.Identity.Name
-                });
+                return Unauthorized();
+            }
 
+            var existingLike = await _db.Likes
+                .FirstOrDefaultAsync(l => l.FeedItemId == id && l.UserId == user.Id);
+
+            if (existingLike == null)
+            {
+                var like = new Like
+                {
+                    FeedItemId = id,
+                    UserId = user.Id, 
+                    UserName = user.UserName
+                };
+                _db.Likes.Add(like);
+                await _db.SaveChangesAsync();
+            }
+            else
+            {
+                _db.Likes.Remove(existingLike);
                 await _db.SaveChangesAsync();
             }
 
-            // Return updated likes
-            var likes = post.Likes.Select(l => l.UserName).ToList();
+            var likes = await _db.Likes
+                .Where(l => l.FeedItemId == id)
+                .ToListAsync();
+
             return Json(likes);
         }
+
 
 
     }

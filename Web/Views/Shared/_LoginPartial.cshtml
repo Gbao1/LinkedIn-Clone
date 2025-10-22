@@ -8,7 +8,7 @@
 {
     var user = await UserManager.GetUserAsync(User);
     var profile = Db.Profiles.FirstOrDefault(p => p.UserId == user.Id);
-    var avatar = string.IsNullOrEmpty(profile?.AvatarUrl) ? Url.Content("~/images/default-avatar.png") : profile.AvatarUrl;
+    var avatar = string.IsNullOrEmpty(profile?.AvatarUrl) ? Url.Content("~/images/profilepictures/img2.webp") : profile.AvatarUrl;
     <ul class="nav navbar-nav navbar-right">
         <li class="nav-item d-flex align-items-center">
             <img src="@avatar" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;margin-right:8px;" />
