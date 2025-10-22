@@ -124,9 +124,5 @@ namespace Link.Controllers
 
             return Json(new { formatted });
         }
-
-
-
-
     }
 }
