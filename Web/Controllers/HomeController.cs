@@ -48,16 +48,22 @@ namespace Link.Controllers
 
             return View(vm);
         }
+
         [HttpPost]
         public async Task<IActionResult> CreatePost(string text)
         {
-            if (string.IsNullOrWhiteSpace(text))
-                return RedirectToAction("Index");
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
 
             var post = new FeedItem
             {
-                Author = User.Identity.Name,
-                AuthorTitle = "Developer", // optionally pull from Profile
+                UserId = user.Id, // associate post with logged-in user
+                Author = user.UserName,
+                AuthorTitle = "Member",
                 Text = text,
                 TimeAgo = "Just now",
                 AvatarUrl = "/images/profilepictures/img2.webp"
@@ -68,6 +74,7 @@ namespace Link.Controllers
 
             return RedirectToAction("Index");
         }
+
         [HttpPost]
         public async Task<IActionResult> LikePost(int id)
         {

@@ -6,6 +6,7 @@
 
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -17,7 +18,7 @@
         }
 
         .hero {
-            background: linear-gradient(90deg,#0d6efd33,#6f42c133);
+            background: linear-gradient(90deg, #0d6efd33, #6f42c133);
             padding: 2rem;
             border-radius: .75rem;
         }
@@ -31,7 +32,7 @@
 
         .card-modern {
             border-radius: .75rem;
-            box-shadow: 0 6px 18px rgba(20,30,60,0.06);
+            box-shadow: 0 6px 18px rgba(20, 30, 60, 0.06);
         }
 
         .muted {
@@ -43,6 +44,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container py-4">
         <div class="row g-3">
@@ -57,7 +59,23 @@
                             <div class="muted">@Model.CurrentUser.Headline</div>
                         </div>
                         <div class="ms-auto">
-                            <button class="btn btn-outline-primary connect-btn">Share an update</button>
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <form asp-controller="Home" asp-action="CreatePost" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <textarea name="text" class="form-control" placeholder="What's on your mind?"
+                                    required></textarea>
+                                    <button type="submit" class="btn btn-outline-primary connect-btn" style="margin: 5px 0;">Post</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <p>
+                                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary connect-btn">
+                                        Log in to create a post
+                                    </a>
+                                </p>
+                            }
                         </div>
                     </div>
                 </div>
@@ -65,67 +83,72 @@
                 <!-- Feed Items -->
                 <div>
                     @foreach (var item in Model.FeedItems)
-    {
-                    <div class="card-modern bg-white p-3 mb-3">
-                        <div class="d-flex">
-                            <img src="@item.AvatarUrl" alt="@item.Author" class="rounded me-3" width="56" height="56" />
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-center">
-                                    <div>
-                                        <strong>@item.Author</strong>
-                                        <div class="muted small">@item.AuthorTitle • @item.TimeAgo</div>
+                    {
+                        <div class="card-modern bg-white p-3 mb-3">
+                            <div class="d-flex">
+                                <img src="@item.AvatarUrl" alt="@item.Author" class="rounded me-3" width="56" height="56" />
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <strong>@item.Author</strong>
+                                            <div class="muted small">@item.AuthorTitle • @item.TimeAgo</div>
+                                        </div>
+                                        <div class="ms-auto muted">•••</div>
                                     </div>
-                                    <div class="ms-auto muted">•••</div>
+
+                                    <p class="mt-2 mb-1">@item.Text</p>
+
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex align-items-center mt-2 small muted">
+                                        @if (User.Identity.IsAuthenticated)
+                                        {
+                                            <button type="button" onclick="likePost(@item.Id)"
+                                                class="btn btn-sm btn-light me-2">Like</button>
+                                            <button type="button" class="btn btn-sm btn-light me-2">Comment</button>
+                                            <button type="button" class="btn btn-sm btn-light">Share</button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" onclick="showSignInPopup()"
+                                                class="btn btn-sm btn-light me-2">Like</button>
+                                            <button type="button" onclick="showSignInPopup()"
+                                                class="btn btn-sm btn-light me-2">Comment</button>
+                                            <button type="button" onclick="showSignInPopup()"
+                                                class="btn btn-sm btn-light">Share</button>
+                                        }
+                                    </div>
+
+                                    <!-- Likes Display -->
+                                    <div class="small mt-1 text-muted" id="likes-@item.Id">
+                                        @if (item.Likes != null && item.Likes.Count > 0)
+                                        {
+                                            var likes = item.Likes.Select(l => l.UserName).ToList();
+
+                                            if (likes.Count <= 3)
+                                            {
+                                                <text>@string.Join(", ", likes)</text>
+                                                if (likes.Count == 1)
+                                                {
+                                                    <text> liked this</text>
+                                                }
+                                                else
+                                                {
+                                                    <text> liked this</text>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var firstThree = likes.Take(3).ToList();
+                                                <text>@string.Join(", ", firstThree) + " +" + (likes.Count - 3) + " more liked
+                                                    this"</text>
+                                            }
+                                        }
+                                    </div>
+
                                 </div>
-
-                                <p class="mt-2 mb-1">@item.Text</p>
-
-                                <!-- Action Buttons -->
-                                <div class="d-flex align-items-center mt-2 small muted">
-                                    @if (User.Identity.IsAuthenticated)
-                        {
-                                    <button type="button" onclick="likePost(@item.Id)" class="btn btn-sm btn-light me-2">Like</button>
-                                    <button type="button" class="btn btn-sm btn-light me-2">Comment</button>
-                                    <button type="button" class="btn btn-sm btn-light">Share</button>
-                        }
-                        else
-                        {
-                                    <button type="button" onclick="showSignInPopup()" class="btn btn-sm btn-light me-2">Like</button>
-                                    <button type="button" onclick="showSignInPopup()" class="btn btn-sm btn-light me-2">Comment</button>
-                                    <button type="button" onclick="showSignInPopup()" class="btn btn-sm btn-light">Share</button>
-                        }
-                                </div>
-
-                                <!-- Likes Display -->
-                                <div class="small mt-1 text-muted" id="likes-@item.Id">
-                                    @if (item.Likes != null && item.Likes.Count > 0)
-    {
-        var likes = item.Likes.Select(l => l.UserName).ToList();
-
-        if (likes.Count <= 3)
-        {
-                                    <text>@string.Join(", ", likes)</text>
-            if (likes.Count == 1)
-            {
-                                    <text> liked this</text>
-            }
-            else
-            {
-                                    <text> liked this</text>
-            }
-        }
-        else
-        {
-            var firstThree = likes.Take(3).ToList();
-                                    <text>@string.Join(", ", firstThree) + " +" + (likes.Count - 3) + " more liked this"</text>
-        }
-    }
-                                </div>
-
                             </div>
                         </div>
-                    </div>
-    }
+                    }
                 </div>
             </div>
 
@@ -136,16 +159,16 @@
                     <h6 class="mb-3">People You May Know</h6>
                     @foreach (var s in Model.Suggestions)
                     {
-                    <div class="d-flex align-items-center mb-3">
-                        <img src="@s.AvatarUrl" class="rounded-circle me-3" width="48" height="48" />
-                        <div>
-                            <div><strong>@s.FullName</strong></div>
-                            <div class="small muted">@s.Headline</div>
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="@s.AvatarUrl" class="rounded-circle me-3" width="48" height="48" />
+                            <div>
+                                <div><strong>@s.FullName</strong></div>
+                                <div class="small muted">@s.Headline</div>
+                            </div>
+                            <div class="ms-auto">
+                                <button class="btn btn-sm btn-outline-primary">Connect</button>
+                            </div>
                         </div>
-                        <div class="ms-auto">
-                            <button class="btn btn-sm btn-outline-primary">Connect</button>
-                        </div>
-                    </div>
                     }
                 </div>
 
@@ -181,7 +204,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="loginPassword" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="loginPassword" name="Input.Password" required />
+                            <input type="password" class="form-control" id="loginPassword" name="Input.Password"
+                                required />
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Sign In</button>
                     </form>
@@ -198,24 +222,25 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function showSignInPopup() {
-        var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-        loginModal.show();
-    }
+            var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+            loginModal.show();
+        }
 
         async function likePost(postId) {
-        const response = await fetch(`/Home/LikePost?id=${postId}`, {method: 'POST' });
+            const response = await fetch(`/Home/LikePost?id=${postId}`, { method: 'POST' });
 
-        if (response.ok) {
-            const result = await response.json();
-        const likesDiv = document.getElementById('likes-' + postId);
-        likesDiv.innerText = result.formatted || "";
-        } else if (response.status === 401) {
-            showSignInPopup();
+            if (response.ok) {
+                const result = await response.json();
+                const likesDiv = document.getElementById('likes-' + postId);
+                likesDiv.innerText = result.formatted || "";
+            } else if (response.status === 401) {
+                showSignInPopup();
+            }
         }
-    }
     </script>
 
 
     </script>
 </body>
+
 </html>
