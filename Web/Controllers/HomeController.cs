@@ -29,10 +29,10 @@ namespace Link.Controllers
 
             var vm = new HomeIndexViewModel
             {
-                CurrentUser = new UserProfile
+                CurrentUser = new Profile
                 {
-                    FullName = User.Identity.Name ?? "Guest",
-                    Headline = "Developer",
+                    FullName = User.Identity.Name ?? $"Guest{Guid.NewGuid().ToString("N").Substring(0, 12)}",
+                    Headline = "-",
                     AvatarUrl = "/images/profilepictures/img2.webp"
                 },
                 Suggestions = await _db.UserProfiles
