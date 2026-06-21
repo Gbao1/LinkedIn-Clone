@@ -1,20 +1,115 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# LinkedIn Clone
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+LinkedIn Clone is a full-stack social web application built with ASP.NET Core MVC. It includes user authentication, profile management, a post feed, and like/unlike interactions, with Entity Framework Core handling data access.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Tech Stack
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+- Backend: ASP.NET Core 8 (MVC + Razor Pages)
+- Language: C# (.NET 8)
+- ORM: Entity Framework Core
+- Auth: ASP.NET Core Identity
+- Databases: SQLite (default) and SQL Server (supported)
+- Frontend: Razor Views, HTML, CSS, JavaScript
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+## Features
+
+- User registration and login with Identity
+- Profile create/edit/details flow
+- Feed post creation for authenticated users
+- Like/unlike on posts with dynamic response
+- Seed data for demo users, posts, and likes
+- Automatic migration and startup seeding
+
+## Project Structure
+
+```
+LinkedIn-Clone/
+	LinkedInClone.sln
+	Web/
+		Controllers/
+		Data/
+		Models/
+		Views/
+		wwwroot/
+		Program.cs
+		appsettings.json
+```
+
+## Prerequisites
+
+- .NET SDK 8.0+
+- SQL Server (optional, only if you want SQL Server instead of SQLite)
+
+## Getting Started
+
+1. Clone the repository.
+2. Open a terminal in the repository root.
+3. Restore dependencies and build:
+
+```bash
+dotnet restore
+dotnet build LinkedInClone.sln
+```
+
+4. Run the web app:
+
+```bash
+dotnet run --project Web/Web.csproj
+```
+
+5. Open the URL shown in terminal (typically https://localhost:xxxx).
+
+## Database Configuration
+
+By default, the app uses SQLite via:
+
+```json
+"ConnectionStrings": {
+	"DefaultConnection": "DataSource=app.db;Cache=Shared"
+}
+```
+
+To use SQL Server, update `Web/appsettings.json` with a SQL Server connection string, for example:
+
+```json
+"ConnectionStrings": {
+	"DefaultConnection": "Server=YOUR_SERVER;Database=LinkedInCloneDb;Trusted_Connection=True;TrustServerCertificate=True"
+}
+```
+
+The app detects SQL Server connection strings and switches provider automatically.
+
+## Build and Test
+
+Build:
+
+```bash
+dotnet build LinkedInClone.sln
+```
+
+Run:
+
+```bash
+dotnet run --project Web/Web.csproj
+```
+
+If you add tests later:
+
+```bash
+dotnet test
+```
+
+## Branches
+
+- `main`: primary branch
+- `bao_posting`: posting-focused development branch
+
+## Contribution
+
+1. Create a new branch from `main`.
+2. Commit focused, descriptive changes.
+3. Open a pull request with a clear summary and screenshots for UI updates.
+
+## License
+
+This project is for educational and portfolio purposes.
